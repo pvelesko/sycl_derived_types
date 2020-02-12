@@ -9,6 +9,7 @@ template<class T>
 class Particle {
   public:
   T  pos[3]; // represent pos(x,y,z) coords
+  const accessor<int, 1, access::mode::read_write, access::target::global_buffer> a;
 };
 
 template<class T>
@@ -16,6 +17,7 @@ class ParticleAoS {
   public:
   std::vector<Particle<T>> *ptls;
   // Default constructor
+  ParticleAoS() {};
   ParticleAoS(int n) {
     ptls = new std::vector<Particle<T>>(n);};
   // Copy Constructor
@@ -31,6 +33,9 @@ template<class T>
 class ParticleSoAtype_sycl {
   public:
   ParticleSoAtype<T> *hostptl;
+  ~ParticleSoAtype_sycl() {
+    delete hostptl;
+  }
   buffer<Particle<T>, 1> *ptls_d;
   ParticleSoAtype_sycl(int n) {
     hostptl = new ParticleSoAtype<T>(n);
@@ -133,6 +138,7 @@ auto ptl_incr_lambda = [](auto p, int len) {
   }
 };
 
+  {
   // AoS
   ParticleAoS<float> p(n);
   ParticleAoS_sycl<float> p_d(n);
@@ -144,10 +150,12 @@ auto ptl_incr_lambda = [](auto p, int len) {
 
 
   q.submit([&] (handler& cgh) mutable { // q scope
-    accessor<Particle<float>, 1, access::mode::read_write> p = pp_d.ptls_d->get_access<access::mode::read_write>(cgh);
+    //accessor<Particle<float>, 1, access::mode::read_write> p = pp_d.ptls_d->get_access<access::mode::read_write>(cgh);
+    auto p = pp_d.ptls_d->get_access<access::mode::read_write>(cgh);
     int size = pp_d.ptls->size();
     cgh.parallel_for<class oneplusone>(range<1>(n), [=] (id<1> idx) {
         ptl_incr_lambda(p, size);
+        ParticleAoS<float> sycl_ptl{};
     } ); // end task scope
   } ); // end q scope
 
@@ -156,6 +164,7 @@ auto ptl_incr_lambda = [](auto p, int len) {
   dump((*p.ptls)[0].pos, 3, "ptl_pos");
   auto pa = pp_d.ptls_d->template get_access<access::mode::read>();
   dump(pa[0].pos, 3, "ptl_pos");
+  }
 
 //  // SoA
 //  ParticleSoA ptl_soa(n);
