@@ -85,7 +85,7 @@ class ParticleAoS {
   Particle&lt;T&gt;* data() const {
     return ptls;
   };
-
+  //
   /* This section gets compiled for the host only
     Allows for proper deallocation of USM */
 #ifndef \_\_SYCL_DEVICE_ONLY\_\_
@@ -94,7 +94,7 @@ class ParticleAoS {
     ref = other.ref;
     (*ref)++;
   };
-_
+//
   ~ParticleAoS() {
     (*ref)--;
     if (*ref == 0) {
@@ -104,9 +104,7 @@ _
     }
   };
 #endif
-_
 };
-
 </code></pre>
 <h3 id="constructor">Constructor</h3>
 <p>To meet the layout requirement we make <code>ptls</code> pointer private, along with <code>data()</code> function to return the pointer.</p>
