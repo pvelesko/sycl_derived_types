@@ -65,13 +65,14 @@ int main(int argc, char** argv) {
   int N = n;
   ParticleAoS<float> particles(N);
 
+  dump(particles.data()[0].pos, "particles[0].pos");
   q.submit([&](handler& cgh) { // q scope
     cgh.parallel_for(range<1>(N), [=](id<1> idx) mutable { // needs to be mutable, otherwise particles are const
-      int i = idx[0];
-      ptl_incr(particles, i, N);
+      ptl_incr(particles, idx, N);
     } ); // end task scope
   } ); // end q scope
   q.wait();
+  dump(particles.data()[0].pos, "particles[0].pos");
 
   return 0;
 }
