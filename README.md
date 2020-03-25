@@ -89,7 +89,7 @@ class ParticleAoS {
 
   /* This section gets compiled for the host only
     Allows for proper deallocation of USM */
-#ifndef __SYCL_DEVICE_ONLY__
+#ifndef \_\_SYCL_DEVICE_ONLY\_\_
   ParticleAoS(const ParticleAoS&lt;T&gt;&amp; other) {
     ptls = other.ptls;
     ref = other.ref;
