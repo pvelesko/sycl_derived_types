@@ -53,7 +53,7 @@ class ParticleAoS {
 };
 
 template<class T>
-void ptl_incr(ParticleAoS<T>& p, int i, int len) {
+inline void ptl_incr(ParticleAoS<T>& p, int i, int len) {
   p.data()[i].pos[0] = 1;
   p.data()[i].pos[1] = 2;
   p.data()[i].pos[2] = 3;
@@ -63,16 +63,12 @@ int main(int argc, char** argv) {
   init(); // Queue initialize
   process_args(argc, argv);
   int N = n;
-
   ParticleAoS<float> particles(N);
-  q.submit([&](handler& cgh) { // q scope
-    cgh.parallel_for(range<1>(N), [=](id<1> idx) {
-      int i = idx[0];
-      particles.data()[i].pos[0] = 1;
-      particles.data()[i].pos[1] = 2;
-      particles.data()[i].pos[2] = 3;
 
-      //ptl_incr(particles, i, N);
+  q.submit([&](handler& cgh) { // q scope
+    cgh.parallel_for(range<1>(N), [=](id<1> idx) mutable { // needs to be mutable, otherwise particles are const
+      int i = idx[0];
+      ptl_incr(particles, i, N);
     } ); // end task scope
   } ); // end q scope
   q.wait();
