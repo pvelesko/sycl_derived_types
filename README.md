@@ -76,13 +76,13 @@ class ParticleAoS {
   private:
   int* ref; // reference counter for USM
   Particle&lt;T&gt;* ptls;
-  
   public:
   ParticleAoS(int n) {
     ptls = static_cast&lt;Particle&lt;T&gt;*&gt;(malloc_shared(n * sizeof(Particle&lt;T&gt;), q));
     ref = static_cast&lt;int*&gt;(malloc_shared(sizeof(int), q));
     *ref = 1;
   };
+  
   Particle&lt;T&gt;* data() const {
     return ptls;
   };
