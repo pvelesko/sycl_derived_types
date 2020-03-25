@@ -82,7 +82,6 @@ class ParticleAoS {
     ref = static_cast&lt;int*&gt;(malloc_shared(sizeof(int), q));
     *ref = 1;
   };
-  
   Particle&lt;T&gt;* data() const {
     return ptls;
   };
@@ -95,7 +94,7 @@ class ParticleAoS {
     ref = other.ref;
     (*ref)++;
   };
-
+_
   ~ParticleAoS() {
     (*ref)--;
     if (*ref == 0) {
@@ -105,7 +104,7 @@ class ParticleAoS {
     }
   };
 #endif
-
+_
 };
 
 </code></pre>
