@@ -12,6 +12,14 @@ struct Particle {
   T  acc[3]; 
 };
 
+namespace std {
+template <class T>
+std::ostream& operator<<(std::ostream& out, const Particle<T>& p) {
+  out << "pos [" << p.pos[0] << ", " << p.pos[1] << ", " << p.pos[2] << "]";
+  return out;
+}
+}
+
 template<class T>
 class ParticleAoS {
   int* ref; // reference counter for USM
@@ -20,7 +28,7 @@ class ParticleAoS {
   ParticleAoS(int n) {
     ptls = static_cast<Particle<T>*>(malloc_shared(n * sizeof(Particle<T>), q));
     ref = static_cast<int*>(malloc_shared(sizeof(int), q));
-    for (int i = 0; i << n; i++) {
+    for (int i = 0; i < n; i++) {
       ptls[i].pos[0] = 0; ptls[i].pos[1] = 0; ptls[i].pos[2] = 0;
       ptls[i].vel[0] = 0; ptls[i].vel[1] = 0; ptls[i].vel[2] = 0;
       ptls[i].acc[0] = 0; ptls[i].acc[1] = 0; ptls[i].acc[2] = 0;
@@ -65,14 +73,19 @@ int main(int argc, char** argv) {
   int N = n;
   ParticleAoS<float> particles(N);
 
-  dump(particles.data()[0].pos, "particles[0].pos");
+  //dump(particles.data()[0].pos, "particles[0].pos");
+  for(int i = 0; i < N; i++)
+    std::cout << "Particle " << i << " " << particles.data()[i] << std::endl;
+ 
   q.submit([&](handler& cgh) { // q scope
     cgh.parallel_for(range<1>(N), [=](id<1> idx) mutable { // needs to be mutable, otherwise particles are const
-      ptl_incr(particles, idx, N);
+      ptl_incr(particles, idx[0], N);
     } ); // end task scope
   } ); // end q scope
   q.wait();
-  dump(particles.data()[0].pos, "particles[0].pos");
-
+  //dump(particles.data()[0].pos, "particles[0].pos");
+  for(int i = 0; i < N; i++)
+    std::cout << "Particle " << i << " " << particles.data()[i] << std::endl;
+ 
   return 0;
 }
