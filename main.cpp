@@ -12,6 +12,14 @@ struct Particle {
   T  acc[3]; 
 };
 
+namespace std {
+template <class T>
+std::ostream& operator<<(std::ostream& out, const Particle<T>& p) {
+  out << "pos [" << p.pos[0] << ", " << p.pos[1] << ", " << p.pos[2] << "]";
+  return out;
+}
+}
+
 template<class T>
 class ParticleAoS {
   int* ref; // reference counter for USM
@@ -65,14 +73,19 @@ int main(int argc, char** argv) {
   int N = n;
   ParticleAoS<float> particles(N);
 
-  dump(particles.data()[0].pos, "particles[0].pos");
+  //dump(particles.data()[0].pos, "particles[0].pos");
+  for(int i = 0; i < N; i++)
+    std::cout << "Particle " << i << " " << particles.data()[i] << std::endl;
+ 
   q.submit([&](handler& cgh) { // q scope
     cgh.parallel_for(range<1>(N), [=](id<1> idx) mutable { // needs to be mutable, otherwise particles are const
-      ptl_incr(particles, idx, N);
+      ptl_incr(particles, idx[0], N);
     } ); // end task scope
   } ); // end q scope
   q.wait();
-  dump(particles.data()[0].pos, "particles[0].pos");
-
+  //dump(particles.data()[0].pos, "particles[0].pos");
+  for(int i = 0; i < N; i++)
+    std::cout << "Particle " << i << " " << particles.data()[i] << std::endl;
+ 
   return 0;
 }
