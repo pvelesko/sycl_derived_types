@@ -20,7 +20,7 @@ class ParticleAoS {
   ParticleAoS(int n) {
     ptls = static_cast<Particle<T>*>(malloc_shared(n * sizeof(Particle<T>), q));
     ref = static_cast<int*>(malloc_shared(sizeof(int), q));
-    for (int i = 0; i << n; i++) {
+    for (int i = 0; i < n; i++) {
       ptls[i].pos[0] = 0; ptls[i].pos[1] = 0; ptls[i].pos[2] = 0;
       ptls[i].vel[0] = 0; ptls[i].vel[1] = 0; ptls[i].vel[2] = 0;
       ptls[i].acc[0] = 0; ptls[i].acc[1] = 0; ptls[i].acc[2] = 0;
